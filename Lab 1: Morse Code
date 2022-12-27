@@ -1,0 +1,209 @@
+/*
+ * Lab 1.c
+ *
+ * Created: 2/2/2021 11:44:49 AM
+ * Author : Sebastian Lopez
+			825446681
+ */ 
+#define F_CPU 16000000UL					//	Sets clock to that of the processor
+#define LED_ON PORTB |= (1<<PORTB5)			//	LED_ON as a function
+#include <avr/io.h>							//	Init i/o 
+#include <util/delay.h>						//	Delay function
+
+const int u = 200;								//	Sets one unit time interval 
+void dot(){
+	LED_ON;
+	_delay_ms(u);
+	PORTB &= ~(1<<PORTB5);
+	_delay_ms(u);
+}
+void sp(){
+	_delay_ms(u);
+}
+void dash(){
+	LED_ON;
+	_delay_ms(3*u);
+	PORTB &= ~(1<<PORTB5);
+	_delay_ms(u);
+}
+void ls(){
+	_delay_ms(3*u);
+}
+void ws(){
+	_delay_ms(4*u);
+}
+
+
+
+
+
+
+int main(void)
+{
+DDRB |= (1<<PORTB5);
+	while (1)
+	{
+	char test[30] = "Sebastian Lopez 825446681";
+	int i;
+	for (i=0; test[i] != '\0'; i++)
+	{
+		if(test[i] >= 'a' && test[i] <= 'z')
+		test[i] = test[i] -32;
+	}
+
+	_delay_ms(3000);
+
+	int n;
+	for(n=0; test[n] != '\0'; n++)
+		{
+			if (test[n] == 'A'){
+			dot(); dash(); ls();
+			}
+			else if (test[n] == 'B')
+			{
+			dash(); dot(); dot(); dot(); ls(); 
+			}
+			else if (test[n] == 'C')
+			{
+			dash(); dot(); dash(); dot(); ls();
+			}
+			else if (test[n] == 'D')
+			{
+			dash(); dot(); dot(); ls();
+			}
+			else if (test[n] == 'E')
+			{
+			dot(); ls();
+			}
+			else if (test[n] == 'F')
+			{
+			dot(); dot(); dash(); dot(); ls();
+			}
+			else if (test[n] == 'G')
+			{
+			dash(); dash(); dot(); ls();
+			}
+			else if (test[n] == 'H')
+			{
+			dot(); dot(); dot(); dot();
+			}
+			else if (test[n] == 'I')
+			{
+			dot(); dot(); ls();
+			}
+			else if (test[n] == 'J')
+			{
+			dot(); dash(); dash(); dash(); ls();
+			}
+			else if (test[n] == 'K')
+			{
+			dash(); dot(); dash(); ls();
+			}
+			else if (test[n] == 'L')
+			{
+			dot(); dash(); dot(); dot(); ls();
+			}
+			else if (test[n] == 'M')
+			{
+			dash(); dash(); ls();
+			}
+			else if (test[n] == 'N')
+			{
+			dash(); dot(); ls();
+			}
+			else if (test[n] == 'O')
+			{
+			dash(); dash(); dash(); ls();
+			}
+			else if (test[n] == 'P')
+			{
+			dot(); dash(); dash(); dot(); ls();
+			}
+			else if (test[n] == 'Q')
+			{
+			dash(); dash(); dot(); dash(); ls();
+			}
+			else if (test[n] == 'R')
+			{
+			dot(); dash(); dot(); ls();
+			}
+			else if (test[n] == 'S')
+			{
+			dot(); dot(); dot(); ls();
+			}
+			else if (test[n] == 'T')
+			{
+			dash(); ls();
+			}
+			else if (test[n] == 'U')
+			{
+			dot(); dot(); dash(); ls();
+			}
+			else if (test[n] == 'V')
+			{
+			dot(); dot(); dot(); dash(); ls();
+			}
+			else if (test[n] == 'W')
+			{
+			dot(); dash(); dash(); ls();
+			}
+			else if (test[n] == 'X')
+			{
+			dash(); dot(); dot(); dash(); ls();
+			}
+			else if (test[n] == 'Y')
+			{
+			dash(); dot(); dash(); dash(); ls();
+			}
+			else if (test[n] == 'Z')
+			{
+			dash(); dash(); dot(); dot(); ls();
+			}
+			else if (test[n] == '1')
+			{
+			dot(); dash(); dash(); dash(); dash(); ls();
+			}
+			else if (test[n] == '2')
+			{
+			dot(); dot(); dash(); dash(); dash(); ls();
+			}
+			else if (test[n] == '3')
+			{
+			dot(); dot();dot(); dash(); dash(); ls();
+			}
+			else if (test[n] == '4')
+			{
+			dot(); dot(); dot(); dot(); dash(); ls();
+			}
+			else if (test[n] == '5')
+			{
+			dot(); dot(); dot(); dot(); dot(); ls();
+			}
+			else if (test[n] == '6')
+			{
+			dash(); dot();dot(); dot(); dot(); ls();
+			}
+			else if (test[n] == '7')
+			{
+			dash(); dash(); dot(); dot(); dot(); ls();
+			}
+			else if (test[n] == '8')
+			{
+			dash(); dash(); dash(); dot(); dot(); ls();
+			}
+			else if (test[n] == '9')
+			{
+			dash(); dash(); dash(); dash(); dot(); ls();
+			}
+			else if (test[n] == '0')
+			{
+			dash(); dash(); dash(); dash(); dash(); ls();
+			}
+			else if (test[n] == ' ')
+			{
+			ws(); n++;
+			}
+		}
+	_delay_ms(3000);
+	}
+}

@@ -1,0 +1,65 @@
+/*
+ * Lab 7.c
+ *
+ * Created: 4/14/2021 5:03:53 PM
+ * Author : Sebastian Lopez
+   RedID  : 825446681
+ */ 
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#define LED_ON PORTB |= (1<<PORTB5)
+#define LED_OFF PORTB &= ~(1<<PORTB5)
+
+uint16_t NUM = 0;
+
+void duty_timer(){
+	TCCR2A |= (1<<WGM21);				//sets timer2 to CTC: PWM
+	OCR2A = 77;					        //represents 200Hz for Duty Cycle
+	TIMSK2 |= (1<<OCIE2A|1<<OCIE2B);	//Enable interrupts
+	TCCR2B |= (1<<CS22|1<<CS21|1<<CS20);//sets prescaler to 1024 PWM
+}
+
+void ADC_timer(){
+	TCCR0A |= (1<<WGM01);	//CTC mode
+	OCR0A = 108	;			//7ms
+	TIMSK0 |= (1<<OCIE0A);	//timer interrupt enable for COMPA
+	TCCR0B |= (1<<CS02|1<<CS00); //prescaler to 1024
+}
+
+void init_ADC(){
+	ADCSRA |= (1<<ADEN|1<<ADATE|1<<ADIE);
+	//	ADC ENABLE--ENABLE AUTO-TRIGGER--ADC INTERRUPT ENABLE
+	ADCSRB |= (1<<ADTS1|1<<ADTS0);
+	// AUTO-TRIGG SET TO TIMER0 COMPA
+	ADMUX |= (1<<MUX1/*|1<<ADLAR*/|1<<REFS0);
+	//ADC SOURCE: CH-2 -- TOP 8 BITS ONLY -- 1.1 INTERNAL VOLTAGE REFFERENCE
+	ADCSRA |= (1<<ADPS2|1<<ADPS1|1<<ADPS0);
+	//SETS ADC PRESCALER TO 128 FOR 125kHz
+}
+
+
+int main(void)
+{
+    sei();
+	DDRD |= (1<<DDB5);	//PINB5 set as output for LED
+	DDRB &= ~(1<<DDC2);	//PINC2 set as input from potentiometer 
+	init_ADC();
+	duty_timer();
+	ADC_timer();
+    while (1) 
+    {}
+}
+ISR(ADC_vect){
+	NUM = ADC;		    //read ADC -- put in NUM
+	ADC = 0;		    // clear ADC	
+	float top;		    //float for conversion
+	top = NUM*64/1024;  // top = NUM/ 1024 st. the value is less than 1-- resolution of ADC is 10 bit = 1024-1 = 1023
+	OCR2B = (int)top;	//convert float into int by typecasting
+}
+ISR(TIMER2_COMPA_vect){
+	LED_ON;
+}
+ISR(TIMER2_COMPB_vect){
+	LED_OFF;
+}

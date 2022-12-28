@@ -1,0 +1,64 @@
+/*
+ * Lab 4.c
+ *
+ * Created: 3/9/2021 6:44:16 PM
+ * Author : Sebastian Lopez
+ */ 
+
+#include <avr/io.h>
+#define LED_ON PORTB |= (1<<PORTB5)
+#define LED_OFF PORTB &= ~(1<<PORTB5)
+
+void init_timer( int i){
+	TCCR0A |= (1<<WGM01);						// Sets timer to CTC mode
+	TCCR0B |= (1<<CS02 | 1<<CS00);				// Sets prescaler to 1024
+	OCR0A = 0x9B;								//Sets the stop amount to 155 for roughly 10ms
+	OCR0B = i;									//sets to 16: roughly 10% duty cycle to start
+}
+
+
+
+int main(void)
+{
+	int i = 0;
+    
+    while (1) 
+    {
+		DDRB |= (1<<PORTB5);						//Sets output to LED
+		DDRD |= (1<<PORTB7);						// Sets input to button
+
+		while(i <= 0x9C){
+			if (!(PINB & (1<<DDB7)))				//While the button is being pushed
+			{
+				if (i < 0x9B)
+				{
+					i++;
+				}
+				init_timer(i);
+				LED_ON;
+				while ((TIFR0 & (1<<OCF0B)) == 0){}	//start timer until overflow event
+				TIFR0 |= (1<<OCF0B);				//Resets overflow flag for duty cycle reg
+				
+				LED_OFF;
+				while ((TIFR0 & (1<<OCF0A)) == 0){}	//LED is off for rest of cycle period
+				TIFR0 |= (1<< OCF0A);				//Resets the overflow flag for cycle period reg
+					 	
+			} else{
+				if (i > 0)
+				{
+					init_timer(i);
+					LED_ON;
+					while ((TIFR0 & (1<<OCF0B)) == 0){}	//start timer until overflow event
+					TIFR0 |= (1<<OCF0B);				//Resets overflow flag for duty cycle reg
+					
+					LED_OFF;
+					while ((TIFR0 & (1<<OCF0A)) == 0){}	//LED is off for rest of cycle period
+					TIFR0 |= (1<< OCF0A);				//Resets the overflow flag for cycle period reg
+					i--;
+				  }
+			}
+		}
+		
+    }
+	
+}

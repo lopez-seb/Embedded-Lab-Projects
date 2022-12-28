@@ -1,0 +1,103 @@
+/*
+ * Lab 5.c
+ *
+ * Created: 3/24/2021 7:11:10 PM
+ * Author : Sebastian Lopez
+	redId :	825446681
+ */ 
+
+#include <avr/io.h>
+
+
+
+void init_pwm(){
+	TCCR2A |= (1<<1|1<<0);		//
+	TCCR2B |= (1<<3);			// Set timer mode fast PWM
+	TCCR2B |= (1<<2|1<<1);		// set pre scaler to 256
+	TCCR2A |= (1<<5|1<<6);			//COM2Bn1:0 = 1 (50% duty cycle on compare match) 
+	//OCR2B = 142;
+	//OCR2A = 142;
+}
+//Look up table converts keypad input into float. Math converts float into single argument for setting PWM compare 
+void convert(char a){
+	int x = 0;
+	if (a == '1'){
+		x=141;}
+	else if (a == '2'){
+		x=133;}
+	else if (a == '3'){
+		x=126;}
+	else if (a == 'A'){
+		x=118;}
+	else if (a == '4'){
+		x=112;}
+	else if (a == '5'){
+		x=105;}
+	else if (a == '6'){
+		x=99;}
+	else if (a == 'B'){
+		x=94;}
+	else if (a == '7'){
+		x=88;}
+	else if (a == '8'){
+		x=83;}   //
+	else if (a == '9'){
+		x=79;}
+	else if (a == 'C'){
+		x=74;}
+	else if (a == '*'){
+		x=70;}
+	else if (a == '0'){
+		x=66;}
+	else if (a == '#'){
+		x=62;}
+	else if (a == 'D'){
+		x=59;}
+	 
+	//OCR2A = ((256*(1/(440*pow(2,x/12))))/(4.096));
+	OCR2A = x;
+	init_pwm();
+	//OCR2A = x*2;
+	//n = (int)x;
+	//init_pwm(n);
+}
+/* This scan keypad function has been modified from the one used in lab 3 by:
+	-removing the de-bouncing feature
+	-UART transmit has been replaced by function return
+*/
+void scan_keypad(){
+	int i;
+	int j;
+	//int n;
+	OCR2A = 0;
+	char pad[4][4] = {'1','2','3','A','4','5','6','B','7','8','9','C','*','0','#','D'};
+
+	//PORTD |= (1<<4|1<<5|1<<6|1<<7);			//sets output pins to 1
+	for(i=0; i<4; i++){							//cycle through o/p's and switch them to 0 one at a time
+		PORTD |= (1<<4|1<<5|1<<6|1<<7);			//sets output pins to 1
+		PORTB |= (1<<0|1<<1|1<<2|1<<3);			//sets input pins to 1
+		PORTD &= ~(1<<(DDD4+i));				//reg PORTD now has a 0 in the corresponding pin
+		for(j=0; j<4; j++){						//cycle through input pins looking for a 0 on a pin
+			if(!(PINB & (1<<(DDB0+j)))){		//if pIN-B has a zero on a pin
+				convert(pad[i][j]);		//SEND the char of pad[i][j] to look up table and convert
+				//_delay_ms(250);				NO NEED FOR ANTI BOUNCING	//wait a second for anti bouncing
+				//i= 0;							//reset counters
+				j= 0;
+				PORTD |= (1<<(DDD4+i));			//reset row to high
+			}
+		}
+	}
+}
+
+int main(void)
+{
+    
+    while (1) 
+    {
+	//configures the data direction of the keypad
+	DDRD |= (1<<DDD4|1<<DDD5|1<<DDD6|1<<DDD7|1<<DDD3);	//pins D4-7 set as output for key pad and B5 as AUX out
+	DDRB &= ~(1<<DDB0|1<<DDB1|1<<DDB2|1<<DDB3);	//pins B0-3 set as input
+	scan_keypad();
+    }
+	return 0;
+}

@@ -5,12 +5,12 @@
  * Author : Sebastian Lopez
 			825446681
  */ 
-#define F_CPU 16000000UL					//	Sets clock to that of the processor
-#define LED_ON PORTB |= (1<<PORTB5)			//	LED_ON as a function
-#include <avr/io.h>							//	Init i/o 
-#include <util/delay.h>						//	Delay function
+#define F_CPU 16000000UL			//	Sets clock to that of the processor
+#define LED_ON PORTB |= (1<<PORTB5)		//	LED_ON as a function
+#include <avr/io.h>				//	Init i/o 
+#include <util/delay.h>				//	Delay function
 
-const int u = 200;								//	Sets one unit time interval 
+const int u = 200;				//	Sets one unit time interval 
 void dot(){
 	LED_ON;
 	_delay_ms(u);

@@ -12,24 +12,23 @@
 
 // Initializing UART
 void uart_init (void)
-{											// MAYBE SET TO &= 0 and Clear High|
-	UBRR0H = (BAUDRATE>>8);					//first 4 LSB in UBRR0H
-	UBRR0L = BAUDRATE;						//Setting Baud Rate in UBRR0L
-	UCSR0B |= (1<<TXEN0) | (1<<RXEN0);		//Enables Rx and Tx
+{						// MAYBE SET TO &= 0 and Clear High|
+	UBRR0H = (BAUDRATE>>8);			//first 4 LSB in UBRR0H
+	UBRR0L = BAUDRATE;			//Setting Baud Rate in UBRR0L
+	UCSR0B |= (1<<TXEN0) | (1<<RXEN0);	//Enables Rx and Tx
 	UCSR0C |= (1<<UCSZ00) | (1<<UCSZ01);	//8 Bit Data Format
-	//UCSR0C |= (1<<USBS0)					// Defaults 1 stop bit set @ 0. Uncomment this line to set to 2 
+	//UCSR0C |= (1<<USBS0)			// Defaults 1 stop bit set @ 0. Uncomment this line to set to 2 
 }
 
 // Function for transmitting data via UART
 uart_transmit(unsigned char data)
 {
-	while (!(UCSR0A & (1<<UDRE0)));			// Busy loop: does nothing until register is ready to tx data
-	UDR0 = data;							// Now that the register is empty, "data" is moved into the register to tx
+	while (!(UCSR0A & (1<<UDRE0)));		// Busy loop: does nothing until register is ready to tx data
+	UDR0 = data;				// Now that the register is empty, "data" is moved into the register to tx
 }
 
 int main(void)
 {
-    /* Replace with your application code */
     while (1) 
     {
 	unsigned char data[11] = " 825446681 ";
@@ -37,7 +36,7 @@ int main(void)
 	uart_init();
 	for(i=0; i<12; i++){
 		uart_transmit(data[i]);
-		_delay_ms(500);							// delay as stated in the assignment??
+		_delay_ms(500);			// delay as stated in the assignment??
 		}
     }
 }

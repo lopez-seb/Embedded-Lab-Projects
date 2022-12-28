@@ -1,0 +1,107 @@
+/*
+ * Lab 6.c
+ *
+ * Created: 4/1/2021 8:39:40 PM
+ * Author : Sebastian
+ Red iD : 825446681
+ */ 
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#define LED_ON PORTB |= (1<<PORTB5)
+#define LED_OFF PORTB &= ~(1<<PORTB5)
+
+int num = 0; 
+void duty_timer(){
+	TCCR2A |= (1<<WGM21);				//sets timer2 to CTC: PWM
+	OCR2A = 77;					        //represents 200Hz for Duty Cycle
+	OCR2B = num;
+	TIMSK2 |= (1<<OCIE2A|1<<OCIE2B);	//Enable interrupts
+	TCCR2B |= (1<<CS22|1<<CS21|1<<CS20);//sets prescaler to 1024 PWM
+}
+//Look up table converts keypad input into float. Math converts float into single argument for setting PWM compare
+void convert(char a){
+	int x = 0;
+	if (a == '1'){
+	x=8;}
+	else if (a == '2'){
+	x=15;}
+	else if (a == '3'){
+	x=23;}
+	else if (a == 'A'){
+	x=0;}
+	else if (a == '4'){
+	x=31;}
+	else if (a == '5'){
+	x=38;}
+	else if (a == '6'){
+	x=46;}
+	else if (a == 'B'){
+	x=0;}
+	else if (a == '7'){
+	x=53;}
+	else if (a == '8'){
+	x=62;}   //
+	else if (a == '9'){
+	x=69;}
+	else if (a == 'C'){
+	x=0;}
+	else if (a == '*'){
+	x=0;}
+	else if (a == '0'){
+	x=0;}
+	else if (a == '#'){
+	x=0;}
+	else if (a == 'D'){
+	x=70;}
+
+	num = x;
+	//duty_timer();
+	
+}
+
+void scan_keypad(){
+	int i;
+	int j;
+	
+	char pad[4][4] = {'1','2','3','A','4','5','6','B','7','8','9','C','*','0','#','D'};
+
+	//PORTD |= (1<<4|1<<5|1<<6|1<<7);			//sets output pins to 1
+	for(i=0; i<4; i++){							//cycle through o/p's and switch them to 0 one at a time
+		PORTD |= (1<<4|1<<5|1<<6|1<<7);			//sets output pins to 1
+		PORTB |= (1<<0|1<<1|1<<2|1<<3);			//sets input pins to 1
+		PORTD &= ~(1<<(DDD4+i));				//reg PORTD now has a 0 in the corresponding pin
+		for(j=0; j<4; j++){						//cycle through input pins looking for a 0 on a pin
+			if(!(PINB & (1<<(DDB0+j)))){		//if pIN-B has a zero on a pin
+				convert(pad[i][j]);		        //SEND the char of pad[i][j] to look up table and convert
+				duty_timer();
+			}
+		}
+	}
+}
+
+
+int main(void)
+{
+	//configures the data direction of the keypad
+	DDRD |= (1<<DDD4|1<<DDD5|1<<DDD6|1<<DDD7|1<<DDB5);	//pins D4-7 set as output for key pad + B5 for LED
+	DDRB &= ~(1<<DDB0|1<<DDB1|1<<DDB2|1<<DDB3);	        //pins B0-3 set as input
+	TCCR0A |= (1<<WGM01);				                //sets timer0 to CTC: keypad scan
+	OCR0A = 108;		                                //represents 7ms timer for keyscan
+	TIMSK0 |= (1<<OCIE0A);
+	sei();
+	TCCR0B |= (1<<CS02|1<<CS00);		                //sets prescaler to 1024 keyscan
+	
+
+    while (1) 
+    {}
+}
+	ISR (TIMER0_COMPA_vect){
+		scan_keypad();
+	}
+	ISR (TIMER2_COMPA_vect){
+		LED_ON;
+	}
+	ISR (TIMER2_COMPB_vect){
+		LED_OFF;
+	}

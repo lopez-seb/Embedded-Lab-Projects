@@ -14,19 +14,19 @@
 
 // Initializing UART
 void uart_init (void)
-{											                  // MAYBE SET TO &= 0 and Clear High|
-	UBRR0H = (BAUDRATE>>8);					      //first 4 LSB in UBRR0H
-	UBRR0L = BAUDRATE;						        //Setting Baud Rate in UBRR0L
-	UCSR0B |= (1<<TXEN0) | (1<<RXEN0);		//Enables Rx and Tx
+{						// MAYBE SET TO &= 0 and Clear High|
+	UBRR0H = (BAUDRATE>>8);			//first 4 LSB in UBRR0H
+	UBRR0L = BAUDRATE;			//Setting Baud Rate in UBRR0L
+	UCSR0B |= (1<<TXEN0) | (1<<RXEN0);	//Enables Rx and Tx
 	UCSR0C |= (1<<UCSZ00) | (1<<UCSZ01);	//8 Bit Data Format
-	//UCSR0C |= (1<<USBS0)					      // Defaults 1 stop bit set @ 0. Uncomment this line to set to 2
+	//UCSR0C |= (1<<USBS0)			// Defaults 1 stop bit set @ 0. Uncomment this line to set to 2
 }
 
 // Function for transmitting data via UART
 void uart_transmit(char data)
 {
-	while (!(UCSR0A & (1<<UDRE0)));			// Busy loop: does nothing until register is ready to tx data
-	UDR0 = data;							          // Now that the register is empty, "data" is moved into the register to tx
+	while (!(UCSR0A & (1<<UDRE0)));		// Busy loop: does nothing until register is ready to tx data
+	UDR0 = data;				// Now that the register is empty, "data" is moved into the register to tx
 }
 
 void scan_keypad(){
@@ -35,18 +35,18 @@ void scan_keypad(){
 	char pad[4][4] = {"123A","456B","789C","*0#D"};
 
 
-	for(i=0; i<4; i++){							      //cycle through o/p's and switch them to 0 one at a time
+	for(i=0; i<4; i++){					//cycle through o/p's and switch them to 0 one at a time
 		PORTD |= (1<<4|1<<5|1<<6|1<<7);			//sets output pins to 1						
 		PORTB |= (1<<0|1<<1|1<<2|1<<3);			//sets input pins to 1
-		PORTD &= ~(1<<(DDD4+i));				    //reg PORTD now has a 0 in the corresponding pin
-		for(j=0; j<4; j++){						      //cycle through input pins looking for a 0 on a pin
-			if(!(PINB & (1<<(DDB0+j)))){	    //if pIN-B has a zero on a pin  
-				uart_transmit(pad[i][j]);		    //return the char of pad[i][j]
-				_delay_ms(250);					        //wait a second for anti bouncing
+		PORTD &= ~(1<<(DDD4+i));			//reg PORTD now has a 0 in the corresponding pin
+		for(j=0; j<4; j++){				//cycle through input pins looking for a 0 on a pin
+			if(!(PINB & (1<<(DDB0+j)))){	    	//if pIN-B has a zero on a pin  
+				uart_transmit(pad[i][j]);	//return the char of pad[i][j]
+				_delay_ms(250);			//wait a second for anti bouncing
 				
-				i= 0;							          //reset counters
+				i= 0;				//reset counters
 				j= 0;
-				PORTD |= (1<<(DDD4+i));			//reset row to high
+				PORTD |= (1<<(DDD4+i));		//reset row to high
 			}
 		}
 	}
